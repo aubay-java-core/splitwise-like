@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: "API de Divisão de Despesas"
+  description: "Endpoints para gerenciamento de despesas e grupos."
+  version: "1.0.0"
+servers:
+  - url: "https://api.divisao-despesas.com/v1"
+    description: "Servidor de Produção"
+  - url: "https://sandbox.api.divisao-despesas.com/v1"
+    description: "Servidor de Sandbox"
+paths:
+  /users/register:
+    post:
+      summary: "Cadastro de usuário"
+      description: "Cria um novo usuário na plataforma."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "João Silva"
+                email:
+                  type: string
+                  format: email
+                  example: "joao.silva@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "senhaSegura123"
+              required:
+                - name
+                - email
+                - password
+      responses:
+        '201':
+          description: "Usuário criado com sucesso."
+        '400':
+          description: "Erro na validação dos dados."
+  /users/login:
+    post:
+      summary: "Login do usuário"
+      description: "Autentica o usuário e retorna um token JWT."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "joao.silva@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "senhaSegura123"
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: "Autenticação bem-sucedida."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: "Credenciais inválidas."
+  /groups:
+    post:
+      summary: "Criar grupo"
+      description: "Cria um novo grupo para gerenciar despesas."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Viagem de Férias"
+                members:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                  example: ["joao.silva@example.com", "maria.souza@example.com"]
+              required:
+                - name
+                - members
+      responses:
+        '201':
+          description: "Grupo criado com sucesso."
+        '400':
+          description: "Erro na validação dos dados."
+    get:
+      summary: "Listar grupos do usuário"
+      description: "Retorna todos os grupos dos quais o usuário autenticado faz parte."
+      responses:
+        '200':
+          description: "Lista de grupos retornada com sucesso."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: "grupo123"
+                    name:
+                      type: string
+                      example: "Viagem de Férias"
+                    members:
+                      type: array
+                      items:
+                        type: string
+                        example: "joao.silva@example.com"
+  /groups/{groupId}/expenses:
+    post:
+      summary: "Registrar despesa"
+      description: "Registra uma nova despesa em um grupo."
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "grupo123"
+          description: "ID do grupo."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: "Almoço no restaurante"
+                amount:
+                  type: number
+                  format: float
+                  example: 120.50
+                paidBy:
+                  type: string
+                  format: email
+                  example: "joao.silva@example.com"
+                splitMethod:
+                  type: string
+                  enum: ["equal", "percentage"]
+                  example: "equal"
+                splits:
+                  type: object
+                  additionalProperties:
+                    type: number
+                  example: {"joao.silva@example.com": 50, "maria.souza@example.com": 50}
+              required:
+                - description
+                - amount
+                - paidBy
+                - splitMethod
+      responses:
+        '201':
+          description: "Despesa registrada com sucesso."
+        '400':
+          description: "Erro na validação dos dados."
+  /groups/{groupId}/balances:
+    get:
+      summary: "Consultar saldos do grupo"
+      description: "Retorna o saldo atual de cada membro do grupo."
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "grupo123"
+          description: "ID do grupo."
+      responses:
+        '200':
+          description: "Saldos retornados com sucesso."
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: number
+                example: {"joao.silva@example.com": -50, "maria.souza@example.com": 50}
+  /groups/{groupId}/transactions:
+    get:
+      summary: "Histórico de transações do grupo"
+      description: "Retorna o histórico de transações de um grupo."
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "grupo123"
+          description: "ID do grupo."
+      responses:
+        '200':
+          description: "Histórico retornado com sucesso."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: "transacao123"
+                    description:
+                      type: string
+                      example: "Almoço no restaurante"
+                    amount:
+                      type: number
+                      format: float
+                      example: 120.50
+                    date:
+                      type: string
+                      format: date-time
+                      example: "2024-12-19T15:30:00Z"
+                    paidBy:
+                      type: string
+                      format: email
+                      example: "joao.silva@example.com"
+                    splits:
+                      type: object
+                      additionalProperties:
+                        type: number
+                      example: {"joao.silva@example.com": 50, "maria.souza@example.com": 50}

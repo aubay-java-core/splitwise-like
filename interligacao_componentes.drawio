@@ -1,0 +1,37 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" version="25.0.3">
+  <diagram name="Interligação dos Componentes" id="0">
+    <mxGraphModel dx="1434" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="wzimdHSYXYMTUpUy1FKT-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="frontend" target="backend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend" value="Frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAD3;" parent="1" vertex="1">
+          <mxGeometry x="120" y="250" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" value="Backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFD966;" parent="1" vertex="1">
+          <mxGeometry x="320" y="250" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="database" value="Database" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C9DAF8;" parent="1" vertex="1">
+          <mxGeometry x="514" y="250" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="api_gateway" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+          <mxGeometry x="429" y="420" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;" parent="1" source="backend" target="database" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wzimdHSYXYMTUpUy1FKT-1" value="Cache" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="259" y="420" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wzimdHSYXYMTUpUy1FKT-3" value="Kafka" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="99" y="420" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wzimdHSYXYMTUpUy1FKT-6" value="Config-Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="589" y="420" width="140" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
