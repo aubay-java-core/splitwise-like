@@ -13,53 +13,44 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import pt.community.java.splitwise_like.oauth.utils.PemUtils;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 public class JwtConfig {
 
-    final KeyPair keyPair;
+    private final RSAPublicKey publicKey;
+    private final RSAPrivateKey privateKey;
 
     public JwtConfig() {
-        this.keyPair = generateKeyPair();
-    }
-
-    static KeyPair generateKeyPair() {
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            return keyPairGenerator.generateKeyPair();
+            this.publicKey = PemUtils.readPublicKey("/keys/public_key.pem");
+            this.privateKey = PemUtils.readPrivateKey("/keys/private_key.pem");
         } catch (Exception e) {
             throw new IllegalStateException("Could not generate RSA key pair", e);
         }
     }
+
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey((RSAPublicKey) keyPair.getPublic()).build();
+        return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }
 
     @Bean
     public JwtEncoder jwtEncoder() {
-        // Use an RSA key pair for signing JWTs
-        JWK jwk = new RSAKey.Builder(getPublicKey())
-                .privateKey(getPrivateKey())
+        JWK jwk = new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
+                .keyID("auth-key-2025") // TODO Gerar dinamicamente
                 .algorithm(JWSAlgorithm.RS256)
                 .build();
+
         JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwkSource);
     }
 
-    private RSAPublicKey getPublicKey() {
-        // Load or generate your RSA public key
-        return (RSAPublicKey) keyPair.getPublic();
-    }
-
-    private RSAPrivateKey getPrivateKey() {
-        // Load or generate your RSA private key
-        return (RSAPrivateKey) keyPair.getPrivate();
+    public RSAPublicKey getPublicKey() {
+        return publicKey;
     }
 }

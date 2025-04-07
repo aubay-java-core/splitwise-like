@@ -7,4 +7,4 @@ spring:
                     issuer-uri: http://localhost:8080
 logging:
     level:
-        root: debug
+        root: info

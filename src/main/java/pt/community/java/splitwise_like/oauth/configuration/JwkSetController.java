@@ -23,20 +23,24 @@ public class JwkSetController {
         this.jwtConfig = jwtConfig;
     }
 
-    @GetMapping("/openid-configuration")
+    @GetMapping("/jwks.json")
     public Map<String, Object> getJwks() {
-        List<JWK> jwks = List.of(new RSAKey.Builder(getPublic())
-                .privateKey(getPrivate())
+        RSAPublicKey publicKey = jwtConfig.getPublicKey();
+
+        JWK jwk = new RSAKey.Builder(publicKey)
+                .keyID("auth-key-2025") // TODO Gerar dinamicamente
                 .algorithm(JWSAlgorithm.RS256)
-                .build());
-        return new JWKSet(jwks).toJSONObject();
+                .build();
+
+        return new JWKSet(List.of(jwk)).toJSONObject();
     }
 
-    private RSAPrivateKey getPrivate() {
-        return (RSAPrivateKey) jwtConfig.keyPair.getPrivate();
-    }
-
-    private RSAPublicKey getPublic() {
-        return (RSAPublicKey) jwtConfig.keyPair.getPublic();
+    @GetMapping("/openid-configuration")
+    public Map<String, Object> getOpenIdConfiguration() {
+        return Map.of(
+                "issuer", "http://localhost:8080",
+                "jwks_uri", "http://localhost:8080/.well-known/jwks.json",
+                "id_token_signing_alg_values_supported", List.of("RS256")
+        );
     }
 }
