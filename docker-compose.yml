@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+
+  splitwise-db:
+    container_name: splitwise-db
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: splitwise-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    networks:
+      - splitwise
+    ports:
+      - "5440:5432"
+
+networks:
+  splitwise:
+    driver: bridge

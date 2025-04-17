@@ -17,6 +17,7 @@ import pt.community.java.splitwise_like.oauth.utils.PemUtils;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.UUID;
 
 @Configuration
 public class JwtConfig {
@@ -42,7 +43,7 @@ public class JwtConfig {
     public JwtEncoder jwtEncoder() {
         JWK jwk = new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
-                .keyID("auth-key-2025") // TODO Gerar dinamicamente
+                .keyID(UUID.randomUUID().toString())
                 .algorithm(JWSAlgorithm.RS256)
                 .build();
 

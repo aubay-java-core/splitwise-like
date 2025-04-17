@@ -28,11 +28,28 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/oauth/**").permitAll()
-                        .requestMatchers("/.well-known/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(
+                                "/auth/**",
+                                "/oauth/**",
+                                "/oauth2/**",
+                                "/login/**",
+                                "/.well-known/**",
+                                "/token",
+                                "/userinfo",
+                                "/oidc-client.html",
+                                "/static/**"
+
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/**").access(hasScope("users:read"))
                         .requestMatchers(HttpMethod.POST, "/users/**").access(hasScope("users:write"))
                         .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .permitAll()
+                )
+                .oauth2Login(oauth -> oauth
+                        .defaultSuccessUrl("/auth/oauth2/success", true)
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
@@ -54,7 +71,6 @@ public class SecurityConfig {
             var authorities = new ArrayList<GrantedAuthority>();
 
             authorities.addAll(scopeConverter.convert(jwt));
-
 
             var roles = jwt.getClaimAsStringList("roles");
             if (roles != null) {
