@@ -37,3 +37,11 @@ spring:
 logging:
     level:
         root: info
+
+---
+
+keys:
+    private:
+        path: /keys/private-key.pem
+    public:
+        path: /keys/public-key.pem

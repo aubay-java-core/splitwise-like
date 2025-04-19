@@ -1,28 +1,10 @@
 package pt.community.java.splitwise_like.oauth.repository;
 
-import org.springframework.stereotype.Repository;
-import pt.community.java.splitwise_like.users.request.OidcClient;
+import org.springframework.data.jpa.repository.JpaRepository;
+import pt.community.java.splitwise_like.oauth.model.OidcClient;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
-public class OidcClientRepository {
-
-    private final Map<String, OidcClient> clients = new ConcurrentHashMap<>();
-
-    public OidcClientRepository() {
-        // TODO Fazer busca via banco e implementar multclient
-        OidcClient client = new OidcClient(
-                "web-client",
-                "secret",
-                "http://localhost:8080/oidc-client.html"
-        );
-        clients.put(client.clientId(), client);
-    }
-
-    public Optional<OidcClient> findByClientId(String clientId) {
-        return Optional.ofNullable(clients.get(clientId));
-    }
+public interface OidcClientRepository extends JpaRepository<OidcClient, String> {
+    Optional<OidcClient> findByClientId(String clientId);
 }
