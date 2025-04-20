@@ -38,20 +38,16 @@ Este projeto é uma aplicação estilo Splitwise, que também atua como um **pro
 Para gerar as chaves utilizadas na assinatura de tokens, execute:
 
 ```bash
-# Gerar chave privada
-openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
-
-# Extrair chave pública
-openssl rsa -pubout -in private.pem -out public.pem
+# Gerar chave public e privada
+chmod +x generete-pem.sh
+./generete-pem.sh
 ```
-
-
 
 ## Executando o projeto com Docker
 
 ```
-docker build -t splitwise-oidc .
-docker run -p 8080:8080 splitwise-oidc
+docker build -t splitwise .
+docker run -p 8080:8080 splitwise
 ```
 
 
