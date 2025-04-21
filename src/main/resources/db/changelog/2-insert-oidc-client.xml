@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="2-insert-oidc-client" author="bevilacqua1996">
+        <insert tableName="oidc_clients">
+            <column name="client_id" value="web-client"/>
+            <column name="client_secret" value="secret"/>
+            <column name="redirect_uri" value="http://localhost:8080/oidc-client.html"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
