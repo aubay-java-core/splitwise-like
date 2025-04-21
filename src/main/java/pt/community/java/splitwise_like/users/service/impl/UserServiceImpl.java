@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
                 .map(user -> new org.springframework.security.core.userdetails.User(
                         user.getEmail(),
                         user.getPassword(),
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        List.of(new SimpleGrantedAuthority("USER")) //TODO
                 ))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

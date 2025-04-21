@@ -27,8 +27,8 @@ public class TokenGeneratorServiceImpl implements TokenGeneratorService {
             JWSSigner signer = new RSASSASigner(keyProvider.getRsaJwk().toPrivateKey());
 
 
-            List<String> scopes = new ArrayList<>(List.of("read", "write"));
-            List<String> roles = new ArrayList<>(List.of("ROLE_USER")); // TODO Desafio: Refatorar para buscar no base de dados.
+            List<String> scopes = new ArrayList<>(List.of("users:read", "users:write"));
+            List<String> roles = new ArrayList<>(List.of("USER")); // TODO Desafio: Refatorar para buscar no base de dados.
 
             JWTClaimsSet claims = new JWTClaimsSet.Builder()
                     .issuer("http://localhost:8080")
