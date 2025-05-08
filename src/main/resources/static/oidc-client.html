@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador OIDC</title>
+</head>
+<body>
+    <h2>Simulador de Cliente OIDC</h2>
+    <button onclick="iniciarLogin()">Iniciar Login com Provedor OIDC</button>
+    <pre id="resultado"></pre>
+<!--
+    ttp://localhost:8080/authorize?client_id=$web&redirect_uri=http://localhost:8080/static/oidc-client.html&response_type=code&scope=openid%20email%20profile&state=acb123
+-->
+    <script>
+        const clientId = "web-client";
+        const redirectUri = "http://localhost:8080/oidc-client.html";
+        const state = "abc123";
+
+        function iniciarLogin() {
+            const authUrl = `http://localhost:8080/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&state=${state}`;
+            window.location.href = authUrl;
+        }
+
+        async function verificarCodigo() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get("code");
+            const receivedState = params.get("state");
+
+            if (code) {
+                document.getElementById("resultado").innerText = "Código recebido: " + code;
+
+                const resposta = await fetch("http://localhost:8080/token", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        grant_type: "authorization_code",
+                        code: code,
+                        redirect_uri: redirectUri,
+                        client_id: clientId,
+                        client_secret: "secret"
+                    })
+                });
+
+                const dados = await resposta.json();
+                document.getElementById("resultado").innerText += "\n\nResposta de /token:\n" + JSON.stringify(dados, null, 2);
+            }
+        }
+
+        verificarCodigo();
+    </script>
+</body>
+</html>
