@@ -14,7 +14,7 @@ import pt.community.java.splitwise_like.oauth.service.OidcClientService;
 import pt.community.java.splitwise_like.oauth.service.TokenGeneratorService;
 import pt.community.java.splitwise_like.users.model.Users;
 import pt.community.java.splitwise_like.users.request.LoginRequest;
-import pt.community.java.splitwise_like.users.request.OidcClient;
+import pt.community.java.splitwise_like.users.request.OidcClientRequest;
 import pt.community.java.splitwise_like.users.request.TokenRequest;
 import pt.community.java.splitwise_like.users.service.UserService;
 
@@ -39,7 +39,7 @@ public class TokenController {
             return ResponseEntity.badRequest().body("invalid grant_type");
         }
 
-        OidcClient client = oidcClientService.findByClientId(request.client_id())
+        OidcClientRequest client = oidcClientService.findByClientId(request.client_id())
                 .orElse(null);
 
         if (client == null) {

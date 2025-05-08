@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -25,10 +26,12 @@ public class JwtConfig {
     private final RSAPublicKey publicKey;
     private final RSAPrivateKey privateKey;
 
-    public JwtConfig() {
+
+    public JwtConfig(@Value("${keys.public.path}") String publicKeyPath,
+                     @Value("${keys.private.path}") String privateKeyPath) {
         try {
-            this.publicKey = PemUtils.readPublicKey("/keys/public_key.pem");
-            this.privateKey = PemUtils.readPrivateKey("/keys/private_key.pem");
+            this.publicKey = PemUtils.readPublicKey(publicKeyPath);
+            this.privateKey = PemUtils.readPrivateKey(privateKeyPath);
         } catch (Exception e) {
             throw new IllegalStateException("Could not generate RSA key pair", e);
         }

@@ -15,6 +15,7 @@ services:
     ports:
       - "5440:5432"
 
+
 networks:
   splitwise:
     driver: bridge
