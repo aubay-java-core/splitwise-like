@@ -1,0 +1,24 @@
+package pt.community.java.splitwise_like.expenses.service;
+
+import pt.community.java.splitwise_like.expenses.model.Expense;
+import pt.community.java.splitwise_like.users.model.Users;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+public interface ExpenseService {
+    // CRUD operations
+    Expense createExpense(Expense expense);
+    Optional<Expense> findById(Long id);
+    List<Expense> findAll();
+    Expense updateExpense(Expense expense);
+    void deleteExpense(Long id);
+
+    // Participant operations
+    void addParticipant(Long expenseId, Users user);
+    void removeParticipant(Long expenseId, Users user);
+
+    // Share calculation
+    Map<Users, Double> calculateShares(Long expenseId);
+}

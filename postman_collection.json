@@ -1,0 +1,609 @@
+{
+  "info": {
+    "name": "Splitwise-like API",
+    "description": "A collection for testing the Splitwise-like API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints for authentication and authorization",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Authenticate with email and password"
+          }
+        },
+        {
+          "name": "Get Authorization Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authorize?client_id=client123&redirect_uri=http://localhost:3000/callback&state=xyz123",
+              "host": ["{{baseUrl}}"],
+              "path": ["authorize"],
+              "query": [
+                {
+                  "key": "client_id",
+                  "value": "client123"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "http://localhost:3000/callback"
+                },
+                {
+                  "key": "state",
+                  "value": "xyz123"
+                }
+              ]
+            },
+            "description": "Get an authorization code (requires user to be authenticated)"
+          }
+        },
+        {
+          "name": "Exchange Code for Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/token",
+              "host": ["{{baseUrl}}"],
+              "path": ["token"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"grant_type\": \"authorization_code\",\n  \"client_id\": \"client123\",\n  \"code\": \"auth_code_here\"\n}"
+            },
+            "description": "Exchange an authorization code for access and ID tokens"
+          }
+        },
+        {
+          "name": "OAuth2 Success",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/oauth2/success",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "oauth2", "success"]
+            },
+            "description": "Handle successful OAuth2 login (this is usually called by the OAuth provider)"
+          }
+        },
+        {
+          "name": "JWKS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/jwks.json",
+              "host": ["{{baseUrl}}"],
+              "path": [".well-known", "jwks.json"]
+            },
+            "description": "Get the JSON Web Key Set"
+          }
+        },
+        {
+          "name": "OpenID Configuration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/openid-configuration",
+              "host": ["{{baseUrl}}"],
+              "path": [".well-known", "openid-configuration"]
+            },
+            "description": "Get the OpenID Connect configuration"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Endpoints for user management",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"name\": \"New User\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Register a new user"
+          }
+        },
+        {
+          "name": "Get Private Route",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Access a private route (requires USER role and users:read-financial scope)"
+          }
+        },
+        {
+          "name": "Find User by Email",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/email/user@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "email", "user@example.com"]
+            },
+            "description": "Find a user by email (requires authentication and either matching email or ADMIN role)"
+          }
+        },
+        {
+          "name": "Get User Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/debug",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "debug"]
+            },
+            "description": "Get roles and email from the authentication token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Groups",
+      "description": "Endpoints for group management",
+      "item": [
+        {
+          "name": "Create Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Group\",\n  \"users\": []\n}"
+            },
+            "description": "Create a new group"
+          }
+        },
+        {
+          "name": "Get Group by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "1"]
+            },
+            "description": "Get a group by ID"
+          }
+        },
+        {
+          "name": "Get All Groups",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups"]
+            },
+            "description": "Get all groups"
+          }
+        },
+        {
+          "name": "Update Group",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Group Name\",\n  \"users\": []\n}"
+            },
+            "description": "Update a group"
+          }
+        },
+        {
+          "name": "Delete Group",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "1"]
+            },
+            "description": "Delete a group"
+          }
+        },
+        {
+          "name": "Add Member to Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/1/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "1", "members"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 2,\n  \"email\": \"user@example.com\",\n  \"name\": \"User Name\"\n}"
+            },
+            "description": "Add a member to a group"
+          }
+        },
+        {
+          "name": "Remove Member from Group",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/1/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "1", "members"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 2,\n  \"email\": \"user@example.com\",\n  \"name\": \"User Name\"\n}"
+            },
+            "description": "Remove a member from a group"
+          }
+        },
+        {
+          "name": "Add Expense to Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/1/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "1", "expenses"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100.00,\n  \"description\": \"Dinner\",\n  \"participants\": []\n}"
+            },
+            "description": "Add an expense to a group"
+          }
+        },
+        {
+          "name": "View Group Expenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/1/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "1", "expenses"]
+            },
+            "description": "View expenses for a group"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "description": "Endpoints for expense management",
+      "item": [
+        {
+          "name": "Create Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50.00,\n  \"description\": \"Lunch\",\n  \"participantIds\": [1, 2]\n}"
+            },
+            "description": "Create a new expense"
+          }
+        },
+        {
+          "name": "Get Expense by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "1"]
+            },
+            "description": "Get an expense by ID"
+          }
+        },
+        {
+          "name": "Get All Expenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses"]
+            },
+            "description": "Get all expenses"
+          }
+        },
+        {
+          "name": "Update Expense",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 75.00,\n  \"description\": \"Updated Lunch\",\n  \"participantIds\": [1, 2, 3]\n}"
+            },
+            "description": "Update an expense"
+          }
+        },
+        {
+          "name": "Delete Expense",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "1"]
+            },
+            "description": "Delete an expense"
+          }
+        },
+        {
+          "name": "Add Participant to Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/1/participants",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "1", "participants"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 3,\n  \"email\": \"participant@example.com\",\n  \"name\": \"Participant Name\"\n}"
+            },
+            "description": "Add a participant to an expense"
+          }
+        },
+        {
+          "name": "Remove Participant from Expense",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/1/participants",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "1", "participants"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 3,\n  \"email\": \"participant@example.com\",\n  \"name\": \"Participant Name\"\n}"
+            },
+            "description": "Remove a participant from an expense"
+          }
+        },
+        {
+          "name": "Calculate Expense Shares",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/1/shares",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "1", "shares"]
+            },
+            "description": "Calculate shares for an expense"
+          }
+        }
+      ]
+    }
+  ]
+}

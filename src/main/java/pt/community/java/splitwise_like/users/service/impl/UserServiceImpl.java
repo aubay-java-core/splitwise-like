@@ -25,6 +25,11 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
+    public Optional<Users> findById(Long id) {
+        return usersRepository.findById(id);
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String email) {
         return usersRepository.findByEmail(email)
                 .map(user -> new org.springframework.security.core.userdetails.User(
