@@ -61,14 +61,24 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void addExpense(Long groupId, Expense expense) {
-        // Implementation depends on how expenses are related to groups
-        // This is a placeholder implementation
+        groupRepository.findById(groupId).ifPresent(group -> {
+            // Set the group in the expense
+            expense.setGroup(group);
+
+            // Add the expense to the group's list of expenses
+            group.getExpenses().add(expense);
+
+            // Save the group with the updated list of expenses
+            groupRepository.save(group);
+
+            // Note: The expense itself should be saved by the expense service
+        });
     }
 
     @Override
     public List<Expense> viewGroupExpense(Long groupId) {
-        // Implementation depends on how expenses are related to groups
-        // This is a placeholder implementation
-        return new ArrayList<>();
+        return groupRepository.findById(groupId)
+                .map(Group::getExpenses)
+                .orElse(new ArrayList<>());
     }
 }

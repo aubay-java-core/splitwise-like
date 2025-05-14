@@ -5,9 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pt.community.java.splitwise_like.expenses.model.Expense;
 import pt.community.java.splitwise_like.users.model.Users;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,4 +35,7 @@ public class Group {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<Users> users = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private List<Expense> expenses = new ArrayList<>();
 }

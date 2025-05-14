@@ -15,10 +15,6 @@ public interface ExpenseService {
     Expense updateExpense(Expense expense);
     void deleteExpense(Long id);
 
-    // Participant operations
-    void addParticipant(Long expenseId, Users user);
-    void removeParticipant(Long expenseId, Users user);
-
     // Share calculation
     Map<Users, Double> calculateShares(Long expenseId);
 }

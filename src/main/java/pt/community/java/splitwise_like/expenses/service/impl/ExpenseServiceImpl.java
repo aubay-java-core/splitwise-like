@@ -44,35 +44,21 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public void addParticipant(Long expenseId, Users user) {
-        expenseRepository.findById(expenseId).ifPresent(expense -> {
-            expense.getParticipants().add(user);
-            expenseRepository.save(expense);
-        });
-    }
-
-    @Override
-    public void removeParticipant(Long expenseId, Users user) {
-        expenseRepository.findById(expenseId).ifPresent(expense -> {
-            expense.getParticipants().remove(user);
-            expenseRepository.save(expense);
-        });
-    }
-
-    @Override
     public Map<Users, Double> calculateShares(Long expenseId) {
         Map<Users, Double> shares = new HashMap<>();
-        
+
         expenseRepository.findById(expenseId).ifPresent(expense -> {
-            int participantCount = expense.getParticipants().size();
-            if (participantCount > 0) {
-                double shareAmount = expense.getAmount().doubleValue() / participantCount;
-                expense.getParticipants().forEach(participant -> 
-                    shares.put(participant, shareAmount)
-                );
+            if (expense.getGroup() != null) {
+                int participantCount = expense.getGroup().getUsers().size();
+                if (participantCount > 0) {
+                    double shareAmount = expense.getAmount().doubleValue() / participantCount;
+                    expense.getGroup().getUsers().forEach(participant -> 
+                        shares.put(participant, shareAmount)
+                    );
+                }
             }
         });
-        
+
         return shares;
     }
 }

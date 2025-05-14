@@ -5,11 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pt.community.java.splitwise_like.users.model.Users;
+import pt.community.java.splitwise_like.groups.model.Group;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "expense")
@@ -28,10 +26,7 @@ public class Expense {
 
     private String description;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "expense_participants",
-            joinColumns = @JoinColumn(name = "expense_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<Users> participants = new HashSet<>();
-
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 }

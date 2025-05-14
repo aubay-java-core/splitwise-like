@@ -7,8 +7,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pt.community.java.splitwise_like.expenses.model.Expense;
 import pt.community.java.splitwise_like.expenses.request.ExpenseRequest;
+import pt.community.java.splitwise_like.expenses.response.ExpenseResponse;
 import pt.community.java.splitwise_like.expenses.service.ExpenseService;
-import pt.community.java.splitwise_like.groups.request.UserIdRequest;
+import pt.community.java.splitwise_like.groups.service.GroupService;
 import pt.community.java.splitwise_like.users.model.Users;
 import pt.community.java.splitwise_like.users.service.UserService;
 
@@ -23,47 +24,45 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final UserService userService;
+    private final GroupService groupService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Expense> createExpense(@RequestBody ExpenseRequest request) {
-        Expense expense = new Expense();
-        expense.setAmount(request.amount());
-        expense.setDescription(request.description());
-
-        // Note: Participants should be added separately using the addParticipant endpoint
-
-        Expense createdExpense = expenseService.createExpense(expense);
-        return new ResponseEntity<>(createdExpense, HttpStatus.CREATED);
-    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Expense> getExpenseById(@PathVariable Long id) {
+    public ResponseEntity<ExpenseResponse> getExpenseById(@PathVariable Long id) {
         return expenseService.findById(id)
-                .map(expense -> new ResponseEntity<>(expense, HttpStatus.OK))
+                .map(expense -> {
+                    ExpenseResponse response = new ExpenseResponse(expense.getExpenseId(), expense.getDescription(), expense.getAmount());
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+                })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-        List<Expense> expenses = expenseService.findAll();
-        return new ResponseEntity<>(expenses, HttpStatus.OK);
+    public ResponseEntity<List<ExpenseResponse>> getAllExpenses() {
+        List<ExpenseResponse> responses = expenseService.findAll().stream()
+                .map(expense -> new ExpenseResponse(expense.getExpenseId(), expense.getDescription(), expense.getAmount()))
+                .toList();
+        return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @RequestBody ExpenseRequest request) {
+    public ResponseEntity<ExpenseResponse> updateExpense(@PathVariable Long id, @RequestBody ExpenseRequest request) {
         return expenseService.findById(id)
                 .map(existingExpense -> {
                     existingExpense.setAmount(request.amount());
                     existingExpense.setDescription(request.description());
 
-                    // Note: Participants should be updated separately using the participant endpoints
+                    // Atualizar o grupo, se fornecido
+                    if (request.groupId() != null) {
+                        groupService.findById(request.groupId()).ifPresent(existingExpense::setGroup);
+                    }
 
                     Expense updatedExpense = expenseService.updateExpense(existingExpense);
-                    return new ResponseEntity<>(updatedExpense, HttpStatus.OK);
+                    ExpenseResponse response = new ExpenseResponse(updatedExpense.getExpenseId(), updatedExpense.getDescription(), updatedExpense.getAmount());
+                    return new ResponseEntity<>(response, HttpStatus.OK);
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -75,36 +74,6 @@ public class ExpenseController {
                 .map(expense -> {
                     expenseService.deleteExpense(id);
                     return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @PostMapping("/{expenseId}/participants")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> addParticipant(@PathVariable Long expenseId, @RequestBody UserIdRequest request) {
-        return expenseService.findById(expenseId)
-                .map(expense -> {
-                    return userService.findById(request.userId())
-                            .map(user -> {
-                                expenseService.addParticipant(expenseId, user);
-                                return new ResponseEntity<Void>(HttpStatus.OK);
-                            })
-                            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @DeleteMapping("/{expenseId}/participants")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> removeParticipant(@PathVariable Long expenseId, @RequestBody UserIdRequest request) {
-        return expenseService.findById(expenseId)
-                .map(expense -> {
-                    return userService.findById(request.userId())
-                            .map(user -> {
-                                expenseService.removeParticipant(expenseId, user);
-                                return new ResponseEntity<Void>(HttpStatus.OK);
-                            })
-                            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
