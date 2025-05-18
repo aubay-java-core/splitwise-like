@@ -9,10 +9,15 @@ import pt.community.java.splitwise_like.expenses.model.Expense;
 import pt.community.java.splitwise_like.expenses.request.ExpenseRequest;
 import pt.community.java.splitwise_like.expenses.response.ExpenseResponse;
 import pt.community.java.splitwise_like.expenses.service.ExpenseService;
+import pt.community.java.splitwise_like.groups.facade.GroupManagementFacade;
+import pt.community.java.splitwise_like.groups.mapper.ExpenseMapper;
+import pt.community.java.splitwise_like.groups.mapper.GroupMapper;
 import pt.community.java.splitwise_like.groups.model.Group;
 import pt.community.java.splitwise_like.groups.request.GroupRequest;
 import pt.community.java.splitwise_like.groups.request.UserIdRequest;
 import pt.community.java.splitwise_like.groups.response.GroupResponse;
+import pt.community.java.splitwise_like.groups.service.GroupExpenseService;
+import pt.community.java.splitwise_like.groups.service.GroupMemberService;
 import pt.community.java.splitwise_like.groups.service.GroupService;
 import pt.community.java.splitwise_like.users.model.Users;
 import pt.community.java.splitwise_like.users.service.UserService;
@@ -27,146 +32,87 @@ import java.util.Set;
 public class GroupController {
 
     private final GroupService groupService;
+    private final GroupMemberService groupMemberService;
+    private final GroupExpenseService groupExpenseService;
     private final UserService userService;
-    private final ExpenseService expenseService;
+    private final GroupMapper groupMapper;
+    private final ExpenseMapper expenseMapper;
+    private final GroupManagementFacade groupManagementFacade;
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    //TODO Refator GroupResponse
-    public ResponseEntity<Group> createGroup(@RequestBody GroupRequest groupRequest) {
-        Group group = new Group();
-        group.setName(groupRequest.name());
-
-        Set<Users> users = new HashSet<>();
-        for (Long userId : groupRequest.userIds()) {
-            userService.findById(userId).ifPresent(users::add);
-        }
-        group.setUsers(users);
-
-        Group createdGroup = groupService.createGroup(group);
-        return new ResponseEntity<>(createdGroup, HttpStatus.CREATED);
+    public ResponseEntity<GroupResponse> createGroup(@RequestBody GroupRequest groupRequest) {
+        GroupResponse response = groupManagementFacade.createGroup(groupRequest);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<GroupResponse> getGroupById(@PathVariable Long id) {
         return groupService.findById(id)
-                .map(group -> {
-                    List<String> participants = group.getUsers().stream()
-                            .map(Users::getEmail) // Ou use outro atributo, como nome
-                            .toList();
-
-                    List<ExpenseResponse> expenses = group.getExpenses().stream()
-                            .map(expense -> new ExpenseResponse(expense.getExpenseId(), expense.getDescription(), expense.getAmount()))
-                            .toList();
-
-                    GroupResponse response = new GroupResponse(group.getGroupId(), group.getName(), participants, expenses);
-                    return new ResponseEntity<>(response, HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            .map(groupMapper::toResponse)
+            .map(response -> new ResponseEntity<>(response, HttpStatus.OK))
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<GroupResponse>> getAllGroups() {
         List<GroupResponse> groupResponses = groupService.findAll().stream()
-                .map(group -> {
-                    List<String> participants = group.getUsers().stream()
-                            .map(Users::getEmail)
-                            .toList();
-
-                    List<ExpenseResponse> expenses = group.getExpenses().stream()
-                            .map(expense -> new ExpenseResponse(expense.getExpenseId(), expense.getDescription(), expense.getAmount()))
-                            .toList();
-
-                    return new GroupResponse(group.getGroupId(), group.getName(), participants, expenses);
-                })
+                .map(groupMapper::toResponse)
                 .toList();
 
-        return new ResponseEntity<>(groupResponses, HttpStatus.OK);
+        if (groupResponses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(groupResponses);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<GroupResponse> updateGroup(@PathVariable Long id, @RequestBody GroupRequest groupRequest) {
-        return groupService.findById(id)
-                .map(existingGroup -> {
-                    existingGroup.setName(groupRequest.name());
-
-                    Set<Users> users = new HashSet<>();
-                    for (Long userId : groupRequest.userIds()) {
-                        userService.findById(userId).ifPresent(users::add);
-                    }
-                    existingGroup.setUsers(users);
-
-                    Group updatedGroup = groupService.save(existingGroup);
-
-                    List<String> participants = updatedGroup.getUsers().stream()
-                            .map(Users::getEmail)
-                            .toList();
-
-                    List<ExpenseResponse> expenses = updatedGroup.getExpenses().stream()
-                            .map(expense -> new ExpenseResponse(existingGroup.getGroupId(), expense.getDescription(), expense.getAmount()))
-                            .toList();
-
-                    GroupResponse response = new GroupResponse(updatedGroup.getGroupId(), updatedGroup.getName(), participants, expenses);
-                    return new ResponseEntity<>(response, HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        GroupResponse response = groupManagementFacade.updateGroup(id, groupRequest);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
-        return groupService.findById(id)
-                .map(group -> {
-                    groupService.delete(id);
-                    return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        groupService.delete(id);
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{groupId}/members")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> addMember(@PathVariable Long groupId, @RequestBody UserIdRequest request) {
-        return groupService.findById(groupId)
-                .map(group -> {
-                    userService.findById(request.userId()).ifPresent(user -> {
-                        groupService.addMember(groupId, user);
-                    });
-                    return new ResponseEntity<Void>(HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+        userService.findById(request.userId()).ifPresent(user -> {
+            groupMemberService.addMember(groupId, user);
+        });
+
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{groupId}/members")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> removeMember(@PathVariable Long groupId, @RequestBody UserIdRequest request) {
-        return groupService.findById(groupId)
-                .map(group -> {
-                    userService.findById(request.userId()).ifPresent(user -> {
-                        groupService.removeMember(groupId, user);
-                    });
-                    return new ResponseEntity<Void>(HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+        userService.findById(request.userId()).ifPresent(user -> {
+            groupMemberService.removeMember(groupId, user);
+        });
+
+        return  new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     @PostMapping("/{groupId}/expenses")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> addExpense(@PathVariable Long groupId, @RequestBody ExpenseRequest expenseRequest) {
+       var user =  userService.findById(expenseRequest.paidByUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+        Expense expense = expenseMapper.toExpense(expenseRequest,user);
 
-            //TODO Implement Model Mapper
-            Expense expense = new Expense();
-            expense.setAmount(expenseRequest.amount());
-            expense.setDescription(expenseRequest.description());
-            expense.setPaidBy(userService.findById(expenseRequest.paidByUserId()).orElseThrow(() -> new RuntimeException("User not found")));
-            expense.setSplitMethod(expenseRequest.splitMethodEnum());
-
-            // Add the expense to the group
-            groupService.addExpense(groupId, expense);
-
-            return new ResponseEntity<Void>(HttpStatus.OK);
+        groupExpenseService.addExpense(groupId, expense);
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     @GetMapping("/{groupId}/expenses")
@@ -174,7 +120,7 @@ public class GroupController {
     public ResponseEntity<List<ExpenseResponse>> viewGroupExpenses(@PathVariable Long groupId) {
         return groupService.findById(groupId)
                 .map(group -> {
-                    List<ExpenseResponse> expenses = groupService.viewGroupExpense(groupId).stream()
+                    List<ExpenseResponse> expenses = groupExpenseService.viewGroupExpense(groupId).stream()
                             .map(expense -> new ExpenseResponse(expense.getExpenseId(), expense.getDescription(), expense.getAmount()))
                             .toList();
                     return new ResponseEntity<>(expenses, HttpStatus.OK);

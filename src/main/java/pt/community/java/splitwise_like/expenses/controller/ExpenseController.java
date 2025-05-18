@@ -25,8 +25,6 @@ public class ExpenseController {
     private final ExpenseService expenseService;
     private final GroupService groupService;
 
-
-
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ExpenseResponse> getExpenseById(@PathVariable Long id) {
@@ -47,6 +45,7 @@ public class ExpenseController {
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
+    //TODO How can improve this ?
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ExpenseResponse> updateExpense(@PathVariable Long id, @RequestBody ExpenseRequest request) {
@@ -70,25 +69,18 @@ public class ExpenseController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        return expenseService.findById(id)
-                .map(expense -> {
-                    expenseService.delete(id);
-                    return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        expenseService.delete(id);
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{expenseId}/shares")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, Double>> calculateShares(@PathVariable Long expenseId) {
-        return expenseService.findById(expenseId)
-                .map(expense -> {
-                    Map<Users, Double> shares = expenseService.calculateShares(expenseId);
-                    // Convert Map<Users, Double> to Map<String, Double> using email as key
-                    Map<String, Double> userShares = new HashMap<>();
-                    shares.forEach((user, amount) -> userShares.put(user.getEmail(), amount));
-                    return new ResponseEntity<>(userShares, HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Map<Users, Double> shares = expenseService.calculateShares(expenseId);
+        // Convert Map<Users, Double> to Map<String, Double> using email as key
+        Map<String, Double> userShares = new HashMap<>();
+        shares.forEach((user, amount) -> userShares.put(user.getEmail(), amount));
+
+        return new ResponseEntity<>(userShares, HttpStatus.OK);
     }
 }

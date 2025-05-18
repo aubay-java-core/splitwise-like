@@ -21,7 +21,6 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> registerTransaction(@RequestBody TransactionRequest request) {
 
         TransactionResponse response = convertToTransactionResponse(transactionService.registerTransaction(request));
-
         return ResponseEntity.ok(response);
     }
 

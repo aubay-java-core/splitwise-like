@@ -10,7 +10,6 @@ import java.util.Optional;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
-
     @Query(value = "SELECT SUM(amount) FROM expense_splits WHERE expense_id = :expenseId and user_id = :userId ", nativeQuery = true)
     BigDecimal findByExpenseExpenseIdAndUserId(Long expenseId, Long userId);
 
