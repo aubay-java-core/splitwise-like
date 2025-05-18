@@ -50,6 +50,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         expenseRepository.findById(expenseId).ifPresent(expense -> {
             if (expense.getGroup() != null) {
                 int participantCount = expense.getGroup().getUsers().size();
+
                 if (participantCount > 0) {
                     double shareAmount = expense.getAmount().doubleValue() / participantCount;
                     expense.getGroup().getUsers().forEach(participant -> 

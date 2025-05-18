@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTPUT_DIR="./src/main/keys/resources"
+OUTPUT_DIR="./src/main/resources/keys/"
 
 mkdir -p "$OUTPUT_DIR"
 

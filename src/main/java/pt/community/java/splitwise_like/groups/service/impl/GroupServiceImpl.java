@@ -3,6 +3,7 @@ package pt.community.java.splitwise_like.groups.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pt.community.java.splitwise_like.expenses.model.Expense;
+import pt.community.java.splitwise_like.expenses.service.SplitDetailService;
 import pt.community.java.splitwise_like.groups.model.Group;
 import pt.community.java.splitwise_like.groups.repository.GroupRepository;
 import pt.community.java.splitwise_like.groups.service.GroupService;
@@ -17,6 +18,7 @@ import java.util.Optional;
 public class GroupServiceImpl implements GroupService {
 
     private final GroupRepository groupRepository;
+    private  final SplitDetailService splitDetailService;
 
     @Override
     public Group createGroup(Group group) {
@@ -64,6 +66,7 @@ public class GroupServiceImpl implements GroupService {
         groupRepository.findById(groupId).ifPresent(group -> {
             // Set the group in the expense
             expense.setGroup(group);
+            expense.setSplits(splitDetailService.createSplitDetail(expense));
 
             // Add the expense to the group's list of expenses
             group.getExpenses().add(expense);

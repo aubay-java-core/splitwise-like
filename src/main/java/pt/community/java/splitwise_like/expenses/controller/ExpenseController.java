@@ -23,8 +23,8 @@ import java.util.Map;
 public class ExpenseController {
 
     private final ExpenseService expenseService;
-    private final UserService userService;
     private final GroupService groupService;
+
 
 
     @GetMapping("/{id}")

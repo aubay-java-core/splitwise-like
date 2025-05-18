@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pt.community.java.splitwise_like.expenses.model.Expense;
 import pt.community.java.splitwise_like.users.model.Users;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -25,6 +27,10 @@ public class Transaction {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "expense_id")
+    private Expense expense;
+
     @ManyToOne
     @JoinColumn(name = "from_user_id", nullable = false)
     private Users fromUser;
@@ -33,7 +39,8 @@ public class Transaction {
     @JoinColumn(name = "to_user_id", nullable = false)
     private Users toUser;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
-    private Date date;
+    private LocalDateTime createdAt;
+
+
 }

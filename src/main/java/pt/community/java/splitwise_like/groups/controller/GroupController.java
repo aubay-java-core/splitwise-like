@@ -32,6 +32,7 @@ public class GroupController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
+    //TODO Refator GroupResponse
     public ResponseEntity<Group> createGroup(@RequestBody GroupRequest groupRequest) {
         Group group = new Group();
         group.setName(groupRequest.name());
@@ -154,18 +155,18 @@ public class GroupController {
     @PostMapping("/{groupId}/expenses")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> addExpense(@PathVariable Long groupId, @RequestBody ExpenseRequest expenseRequest) {
-        return groupService.findById(groupId)
-                .map(group -> {
-                    Expense expense = new Expense();
-                    expense.setAmount(expenseRequest.amount());
-                    expense.setDescription(expenseRequest.description());
 
-                    // Add the expense to the group
-                    groupService.addExpense(groupId, expense);
+            //TODO Implement Model Mapper
+            Expense expense = new Expense();
+            expense.setAmount(expenseRequest.amount());
+            expense.setDescription(expenseRequest.description());
+            expense.setPaidBy(userService.findById(expenseRequest.paidByUserId()).orElseThrow(() -> new RuntimeException("User not found")));
+            expense.setSplitMethod(expenseRequest.splitMethodEnum());
 
-                    return new ResponseEntity<Void>(HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            // Add the expense to the group
+            groupService.addExpense(groupId, expense);
+
+            return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     @GetMapping("/{groupId}/expenses")
