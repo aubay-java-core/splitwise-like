@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import pt.community.java.splitwise_like.commons.AbstractCrudService;
 import pt.community.java.splitwise_like.expenses.model.Expense;
+import pt.community.java.splitwise_like.expenses.service.SplitDetailService;
 import pt.community.java.splitwise_like.groups.model.Group;
 import pt.community.java.splitwise_like.groups.repository.GroupRepository;
 import pt.community.java.splitwise_like.groups.service.GroupExpenseService;
@@ -17,6 +18,7 @@ import java.util.List;
 public class GroupExpenseServiceImpl  extends AbstractCrudService<Group, Long> implements GroupExpenseService {
 
     private final GroupRepository groupRepository;
+    private final SplitDetailService splitDetailService;
 
     @Override
     protected JpaRepository<Group, Long> getRepository() {
@@ -28,7 +30,11 @@ public class GroupExpenseServiceImpl  extends AbstractCrudService<Group, Long> i
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("Group not found"));
 
+        expense.setGroup(group);
+        expense.setSplits(splitDetailService.createSplitDetail(expense));
+
         group.getExpenses().add(expense);
+
         groupRepository.save(group);
     }
 

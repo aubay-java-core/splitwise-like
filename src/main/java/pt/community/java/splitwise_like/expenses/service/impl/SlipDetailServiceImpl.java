@@ -6,7 +6,6 @@ import pt.community.java.splitwise_like.expenses.enums.SplitMethodEnum;
 import pt.community.java.splitwise_like.expenses.model.Expense;
 import pt.community.java.splitwise_like.expenses.model.SplitDetail;
 import pt.community.java.splitwise_like.expenses.repository.ExpenseRepository;
-import pt.community.java.splitwise_like.expenses.repository.SplitDetailRepository;
 import pt.community.java.splitwise_like.expenses.service.SplitDetailService;
 import pt.community.java.splitwise_like.users.model.Users;
 
