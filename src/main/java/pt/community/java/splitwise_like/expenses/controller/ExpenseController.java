@@ -60,7 +60,7 @@ public class ExpenseController {
                         groupService.findById(request.groupId()).ifPresent(existingExpense::setGroup);
                     }
 
-                    Expense updatedExpense = expenseService.updateExpense(existingExpense);
+                    Expense updatedExpense = expenseService.save(existingExpense);
                     ExpenseResponse response = new ExpenseResponse(updatedExpense.getExpenseId(), updatedExpense.getDescription(), updatedExpense.getAmount());
                     return new ResponseEntity<>(response, HttpStatus.OK);
                 })
@@ -72,7 +72,7 @@ public class ExpenseController {
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
         return expenseService.findById(id)
                 .map(expense -> {
-                    expenseService.deleteExpense(id);
+                    expenseService.delete(id);
                     return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));

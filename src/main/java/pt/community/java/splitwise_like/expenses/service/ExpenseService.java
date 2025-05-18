@@ -9,11 +9,10 @@ import java.util.Optional;
 
 public interface ExpenseService {
     // CRUD operations
-    Expense createExpense(Expense expense);
     Optional<Expense> findById(Long id);
     List<Expense> findAll();
-    Expense updateExpense(Expense expense);
-    void deleteExpense(Long id);
+    Expense save(Expense existingExpense);
+    void delete(Long id);
 
     // Share calculation
     Map<Users, Double> calculateShares(Long expenseId);

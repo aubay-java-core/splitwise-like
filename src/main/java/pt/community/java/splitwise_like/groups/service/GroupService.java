@@ -12,8 +12,8 @@ public interface GroupService {
     Group createGroup(Group group);
     Optional<Group> findById(Long id);
     List<Group> findAll();
-    Group updateGroup(Group group);
-    void deleteGroup(Long id);
+    Group save(Group existingGroup);
+    void delete(Long id);
 
     // Group member operations
     void addMember(Long groupId, Users user);
@@ -22,4 +22,5 @@ public interface GroupService {
     // Group expense operations
     void addExpense(Long groupId, Expense expense);
     List<Expense> viewGroupExpense(Long groupId);
+
 }

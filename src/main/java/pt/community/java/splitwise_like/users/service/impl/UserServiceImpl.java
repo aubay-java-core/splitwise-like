@@ -1,11 +1,13 @@
 package pt.community.java.splitwise_like.users.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import pt.community.java.splitwise_like.commons.AbstractCrudService;
 import pt.community.java.splitwise_like.users.model.Users;
 import pt.community.java.splitwise_like.users.repository.UsersRepository;
 import pt.community.java.splitwise_like.users.service.UserService;
@@ -15,19 +17,20 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserDetailsService, UserService {
+public class UserServiceImpl extends AbstractCrudService<Users, Long>  implements UserDetailsService, UserService {
 
     private final UsersRepository usersRepository;
+
+    @Override
+    protected JpaRepository<Users, Long> getRepository() {
+        return usersRepository;
+    }
 
     @Override
     public Optional<Users> findByEmail(String email) {
         return usersRepository.findByEmail(email);
     }
 
-    @Override
-    public Optional<Users> findById(Long id) {
-        return usersRepository.findById(id);
-    }
 
     @Override
     public UserDetails loadUserByUsername(String email) {
@@ -40,8 +43,4 @@ public class UserServiceImpl implements UserDetailsService, UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    @Override
-    public Users save(Users user) {
-        return usersRepository.save(user);
-    }
 }

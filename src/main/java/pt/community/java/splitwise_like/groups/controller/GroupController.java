@@ -99,7 +99,7 @@ public class GroupController {
                     }
                     existingGroup.setUsers(users);
 
-                    Group updatedGroup = groupService.updateGroup(existingGroup);
+                    Group updatedGroup = groupService.save(existingGroup);
 
                     List<String> participants = updatedGroup.getUsers().stream()
                             .map(Users::getEmail)
@@ -120,7 +120,7 @@ public class GroupController {
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
         return groupService.findById(id)
                 .map(group -> {
-                    groupService.deleteGroup(id);
+                    groupService.delete(id);
                     return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));

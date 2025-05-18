@@ -1,7 +1,9 @@
 package pt.community.java.splitwise_like.transactions.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import pt.community.java.splitwise_like.commons.AbstractCrudService;
 import pt.community.java.splitwise_like.expenses.model.Expense;
 import pt.community.java.splitwise_like.expenses.model.SplitDetail;
 import pt.community.java.splitwise_like.expenses.service.ExpenseService;
@@ -19,13 +21,17 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TransactionServiceImpl implements TransactionService {
+public class TransactionServiceImpl extends AbstractCrudService<Transaction, Long> implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final UserService userService;
     private final ExpenseService expenseService;
     private final SplitDetailService splitDetailService;
 
+    @Override
+    protected JpaRepository<Transaction, Long> getRepository() {
+        return transactionRepository;
+    }
 
     @Override
     public Transaction registerTransaction(TransactionRequest request) {
@@ -81,4 +87,5 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> getTransactionsByExpense(Long expenseId) {
         return transactionRepository.findByExpenseExpenseId(expenseId);
     }
+
 }
