@@ -7,6 +7,7 @@ import pt.community.java.splitwise_like.expenses.model.Expense;
 import pt.community.java.splitwise_like.expenses.model.SplitDetail;
 import pt.community.java.splitwise_like.expenses.repository.ExpenseRepository;
 import pt.community.java.splitwise_like.expenses.service.SplitDetailService;
+import pt.community.java.splitwise_like.expenses.splitstrategy.*;
 import pt.community.java.splitwise_like.users.model.Users;
 
 import java.math.BigDecimal;
@@ -18,7 +19,8 @@ import java.util.*;
 public class SlipDetailServiceImpl implements SplitDetailService {
 
     private final ExpenseRepository expenseRepository;
-
+    private final SplitStrategyFactory splitStrategyFactory;
+    private final Map<String, SplitStrategy> strategyMap;
     /**
      * Creates split details based on the selected split method.
      *
@@ -29,21 +31,17 @@ public class SlipDetailServiceImpl implements SplitDetailService {
     public Map<Users, BigDecimal> createSplitDetail(Expense expense) {
         validateExpense(expense);
 
-        Map<Users, BigDecimal> splitDetails;
+        List<Users> participants = new ArrayList<>(expense.getGroup().getUsers());
+        BigDecimal totalAmount = expense.getAmount();
+        var method = expense.getSplitMethod();
 
+        Map<Users, BigDecimal> splitMap;
 
+        SplitStrategy strategy = splitStrategyFactory.getStrategy(method);
+        splitMap = strategy.calculateSplit(totalAmount, participants);
 
-        SplitMethodEnum splitMethod = Optional.ofNullable(expense.getSplitMethod())
-                .orElseThrow(() -> new IllegalArgumentException("O método de divisão não pode ser nulo!"));
+        return splitMap;
 
-        switch (splitMethod) {
-            case EQUAL -> splitDetails = createEqualSplitDetails(expense);
-            // Implement other types of division here if necessary.
-            //  Best way is to refactor with strategy
-            default -> throw new UnsupportedOperationException("Método de divisão não suportado: " + splitMethod);
-        }
-
-        return splitDetails;
     }
 
     /**
@@ -76,12 +74,8 @@ public class SlipDetailServiceImpl implements SplitDetailService {
 
         Map<Users, BigDecimal> splits = new HashMap<>();
 
-        List<SplitDetail> splitDetails = new ArrayList<>();
         participants.forEach(participant -> {
-
-
              splits.put(participant, shareAmount);
-
         });
 
         return splits;

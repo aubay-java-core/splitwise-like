@@ -51,4 +51,16 @@ public class Expense {
     @Column(name = "amount")
     private Map<Users, BigDecimal> splits = new HashMap<>();
 
+    @Transient
+    private Map<Users, BigDecimal> exactSplit;
+
+    @Transient
+    private Map<Users, BigDecimal> percentageSplit;
+
+
+    @Transient
+    private Map<Long, Integer> weightSplit;
+
+
+
 }
